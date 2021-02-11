@@ -3,17 +3,8 @@ import * as fs from "fs";
 import * as path from "path";
 import * as inquirer from "inquirer";
 
-import {isTestFile,isComponentFile,isStyleFile, isScriptFile} from './utils';
+import {isTestFile, flattenArrayDeep, isDefinitionFile} from './utils';
 import Base from './base';
-
-const flattenArrayDeep = (nestedArray: any[]): any[] =>
-  nestedArray.reduce(
-    (prev, current) =>
-      Array.isArray(current)
-        ? [...prev, ...flattenArrayDeep(current)]
-        : [...prev, current],
-    []
-  );
 
 class FindUnused extends Base {
   static description = 'Find all components never used by your app';
@@ -72,7 +63,7 @@ class FindUnused extends Base {
   createUnusedReport(filesUsed = []){
     fs.writeFile(
       "./unusedreport.txt",
-      this.filtreAndExtract(filesUsed).join("\n"),
+      this.filtreAndExtract(filesUsed).map(f=>f.replace(this.startPath, '.')).join("\n"),
       (err)=> err ?
         console.warn(err) :
         console.log(
@@ -95,7 +86,7 @@ class FindUnused extends Base {
     );
 
     const fileUsed = Object.keys(filesUsed);
-    const unusedFile = allFile.filter(f=>!fileUsed.includes(f) && !isTestFile({file:f}))
+    const unusedFile = allFile.filter(f=>!fileUsed.includes(f) && !isTestFile(f)  && !isDefinitionFile(f))
 
     this.statReport.allFile = allFile.length;
     this.statReport.unusedFile = unusedFile.length;
