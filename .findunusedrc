@@ -1,0 +1,20 @@
+{
+    "alias": {
+        "@Atoms/": "./components/atoms/",
+        "@Context/": "./components/context/",
+        "@Hooks/": "./components/hooks/",
+        "@Molecules/": "./components/molecules/",
+        "@Organisms/": "./components/organisms/",
+        "@Pages/": "./components/pages/",
+        "@Queries/": "./components/queries/",
+        "@Helpers/": "./helpers/",
+
+        "@Client": "./client.ts",
+        "@Query": "./query.ts",
+        "@Types": "./types.ts",
+
+        "@Services/": "./services/",
+        "@Constants/": "./constants/",
+        "@Lang/": "./lang/"
+    }
+}

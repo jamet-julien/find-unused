@@ -1,6 +1,8 @@
 import chalk = require("chalk");
 import * as fs from "fs";
 import * as path from "path";
+import * as inquirer from "inquirer";
+
 import {isTestFile,isComponentFile,isStyleFile, isScriptFile} from './utils';
 import Base from './base';
 
@@ -19,50 +21,86 @@ class FindUnused extends Base {
   public listBuffer:any[] = [];
   public wasAnalysted: string[] = [];
   public fileUsedList = {};
+  public rootFolder = '';
+  public statReport = {
+    allFile : 0,
+    unusedFile  : 0
+  }
 
   async run() {
+
+    const response = await inquirer.prompt([
+      {
+        default: 'src',
+        message:
+          "Whats your root folder name ?",
+        name: "rootFolder",
+        type: 'input'
+      },{
+        default: 'index.tsx',
+        message:
+          "Whats your file main ?",
+        name: "mainFile",
+        type: 'input'
+      }
+    ]);
+
     const files = fs.readdirSync(this.startPath);
-    if(files.includes('src')){
+    this.rootFolder = response.rootFolder;
+
+    if(files.includes(this.rootFolder)){
 
       const startFileInfo = {
-        file : 'index',
-        dir: path.join(this.startPath, 'src'),
+        file : response.mainFile,
+        dir: path.join(this.startPath, this.rootFolder),
         exports: []
       };
 
       this.listBuffer.push(startFileInfo);
 
-      this.createJsonFileUsed();
+      this.startAnalyze();
     }else{
       console.log('Launch command on root folder !')
     }
   }
 
-  createJsonFileUsed(){
-    fs.writeFile(
-      "./usedreport.json",
-      JSON.stringify( this.createFileInfo(), null, 2),
-      (err)=> err ?  console.warn(err) : this.createJsonFileUnused()
-    )
+  startAnalyze(){
+    const filesUsed = this.analyzeFileChain()
+    this.createUnusedReport(filesUsed);
   }
 
-  createJsonFileUnused(){
+  createUnusedReport(filesUsed = []){
     fs.writeFile(
-      "./unusedreport.json",
-      JSON.stringify( this.filtreAndExtract(), null, 2),
-      (err)=> err ?  console.warn(err) : console.log(chalk.green('Finished !')))
+      "./unusedreport.txt",
+      this.filtreAndExtract(filesUsed).join("\n"),
+      (err)=> err ?
+        console.warn(err) :
+        console.log(
+          `
+    ----------------------------
+    | All files    = ${chalk.yellow(this.statReport.allFile)}
+    | Unused files = ${chalk.green(this.statReport.unusedFile)}
+    ----------------------------
+          `
+          ))
   }
 
 
-  filtreAndExtract(){
+  filtreAndExtract(filesUsed = []){
+
     const allFile = flattenArrayDeep(
       this.listFile(
-        path.join(this.startPath, 'src')
+        path.join(this.startPath, this.rootFolder)
       )
     );
-    const fileUsed = Object.keys(this.fileUsedList);
-    console.log(chalk.green(allFile.length));
-    return allFile.filter(f=>!fileUsed.includes(f) && !isTestFile({file:f}));
+
+    const fileUsed = Object.keys(filesUsed);
+    const unusedFile = allFile.filter(f=>!fileUsed.includes(f) && !isTestFile({file:f}))
+
+    this.statReport.allFile = allFile.length;
+    this.statReport.unusedFile = unusedFile.length;
+
+    return unusedFile;
   }
 
 
@@ -85,7 +123,7 @@ class FindUnused extends Base {
     const file = arrPath.pop()||'';
     arrPath.shift();
     const dirFile  = path.join.apply(path, arrPath);
-    const dir = path.join(this.startPath, 'src', dirFile);
+    const dir = path.join(this.startPath, this.rootFolder, dirFile);
 
     return {
       file,
@@ -94,7 +132,7 @@ class FindUnused extends Base {
     }
   }
 
-  createFileInfo():any{
+  analyzeFileChain():any{
 
     let output = [];
     let currentFile;
@@ -102,11 +140,11 @@ class FindUnused extends Base {
     while( currentFile = this.listBuffer.pop() ){
       const {file = '', dir = ''} = currentFile;
       
-      const info = this.extractFileInfo({file, dir});
+      const info = this.findFileInfo({file, dir});
       
       this.wasAnalysted.push(path.join(dir, file));
 
-      const importFiles = this.makeImportFile( {dir : info.dir, file : info.base});
+      const importFiles = this.analyzeImport( {dir : info.dir, file : info.base});
 
       const imports = importFiles.reduce((g , { module , pathProject, exports} ):any=>{
           if(pathProject){
@@ -124,23 +162,22 @@ class FindUnused extends Base {
 
       output.push({file : info.base, dir : info.dir, imports});
     }
-    this.fileUsedList = this.cleanOutPut(output);
-    return output;
+    return this.cleanOutPut(output);
   }
 
   cleanOutPut(output:any){
     let cleanedOutPut:Record<string, any> = {};
 
     output.reverse().map(({file='',dir='',imports=[]}:{file:string,dir:string,imports:any[]})=>{
-        const info = this.extractFileInfo({dir, file});
+        const info = this.findFileInfo({dir, file});
         const name = path.join(info.dir, info.base);
         
         if(!cleanedOutPut[name]){
           cleanedOutPut[name] = {use:[]};
         };
 
-       imports.map(({dir='', file='', exports=[]}:{file:string,dir:string,exports:any[]})=>{
-          const info = this.extractFileInfo({dir, file});
+      imports.map(({dir='', file='', exports=[]}:{file:string,dir:string,exports:any[]})=>{
+          const info = this.findFileInfo({dir, file});
           const name = path.join(info.dir, info.base);
 
           if(cleanedOutPut[name]){
@@ -154,7 +191,7 @@ class FindUnused extends Base {
     return cleanedOutPut;
   }
 
-  extractFileInfo({ file = '', dir = ''}):any{
+  findFileInfo({ file = '', dir = ''}):any{
 
     let ext = '';
     let dirPath = path.join(dir, file);
@@ -171,32 +208,26 @@ class FindUnused extends Base {
     return info;
   }
 
-  makeImportFile({ file = '', dir = ''}){
+  analyzeImport({ file = '', dir = ''}){
 
     const dirPath = path.join(dir, file);
     try{
       const fileContents: string = fs.readFileSync(dirPath, "utf-8");  
       const defaultExtract = {module : '', pathProject : '', exports : []};
 
-      return this.getFileModule(fileContents).reduce((g, lineImports):any=>{
+      return this.extractImportLine(fileContents).reduce((g, lineImports):any=>{
         const module = { ...defaultExtract, ...this.extractModule(lineImports, dirPath)};
         return [ ...g, module] ;
         
       }, []);
       
     } catch (e) {
-      console.error(
-          chalk.red(
-              JSON.stringify(
-                { file, dir, dirPath}, null, 2
-              )
-            )
-          );
+      console.error(`\n> Don't find "${chalk.red(dirPath.replace(this.startPath, ''))}"`);
       return [];
     }
   }
 
-  getFileModule( contents:string){
+  extractImportLine( contents:string){
     const matchModuleType: RegExp = new RegExp(
       `(((\t|^)(@import|import|export))[^]*?["'][^]*?["']\s?)`,
       `gim`
@@ -220,8 +251,8 @@ class FindUnused extends Base {
       outPut.pathProject = this.convertToRelativePath(importPath, currentFile);
     }
 
-    if(importPath.indexOf('src') === 0){
-      outPut.pathProject = importPath.replace('src', '.');
+    if(importPath.indexOf(this.rootFolder) === 0){
+      outPut.pathProject = importPath.replace(this.rootFolder, '.');
     }
     
     if(lastChar === '/'){
@@ -253,7 +284,7 @@ class FindUnused extends Base {
       "." : (outPut = '')=>{
 
         const count = (outPut.match(/\.\.\//g) || []).length;
-        let relative = currentFile.replace(`${this.startPath}/src/`,'./');
+        let relative = currentFile.replace(`${this.startPath}/${this.rootFolder}/`,'./');
         
 
         if(relative.lastIndexOf('.')>relative.lastIndexOf('/')){
@@ -286,27 +317,10 @@ class FindUnused extends Base {
 
   extractNameImport(lineImports : string){
     let importName:string[] = [];
-    const importNameRegex: RegExp = new RegExp(`(import[^]*?from\s?)`, "gi");
+    const importNameRegex: RegExp = new RegExp(`((import|export)[^]*?from\s?)`, "gi");
     const [modulesName]: string[] = lineImports.match(importNameRegex)||[''];
-    importName = modulesName.replace(/{|}|import|from/g, "").split(',').map(e=>e.trim());
+    importName = modulesName.replace(/{|}|import|from|export/g, "").split(',').map(e=>e.trim());
     return importName;
-  }
-
-  checkFileType(file:string, ext:string){
-    const fileChecker = [
-      isTestFile,
-      isComponentFile,
-      isStyleFile,
-      isScriptFile
-    ];
-
-    for( let check of fileChecker){
-      const result = check({ext, file});
-      if(result){
-        return result;
-      }
-    }
-    return 'Other';
   }
 
 }
