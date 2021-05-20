@@ -8,29 +8,26 @@ Find all componend never used and list them on `unusedreport.txt`
 [![License](https://img.shields.io/npm/l/find-unused.svg)](https://github.com/jamet-julien/find-unused/blob/master/package.json)
 
 <!-- toc -->
-
--   [find-unused](#find-unused)
--   [Usage](#usage)
--   [File config](#fileconfig)
--   [Commands](#commands)
+* [find-unused](#find-unused)
+* [Usage](#usage)
+* [File config](#file-config)
+* [Commands](#commands)
 <!-- tocstop -->
 
 # Usage
 
 <!-- usage -->
-
 ```sh-session
 $ npm install -g find-unused
 $ find-unused COMMAND
 running command...
 $ find-unused (-v|--version|version)
-find-unused/0.0.1 darwin-x64 node-v14.15.4
+find-unused/0.0.11 darwin-x64 node-v14.15.4
 $ find-unused --help [COMMAND]
 USAGE
   $ find-unused COMMAND
 ...
 ```
-
 <!-- usagestop -->
 
 # File config
