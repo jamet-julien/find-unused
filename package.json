@@ -1,53 +1,53 @@
 {
-  "name": "find-unused",
-  "description": "find all componend never used",
-  "version": "0.0.0",
-  "author": "",
-  "bin": {
-    "find-unused": "./bin/run"
-  },
-  "bugs": "https://github.com/jamet-julien/find-unused/issues",
-  "dependencies": {
-    "@oclif/command": "^1",
-    "@oclif/config": "^1",
-    "@oclif/plugin-help": "^3",
-    "@types/inquirer": "^7.3.1",
-    "chalk": "^4.1.0",
-    "cosmiconfig": "^7.0.0",
-    "inquirer": "^7.3.3",
-    "tslib": "^1"
-  },
-  "devDependencies": {
-    "@oclif/dev-cli": "^1",
-    "@types/node": "^10",
-    "eslint": "^5.13",
-    "eslint-config-oclif": "^3.1",
-    "eslint-config-oclif-typescript": "^0.1",
-    "ts-node": "^8",
-    "typescript": "^3.3"
-  },
-  "engines": {
-    "node": ">=8.0.0"
-  },
-  "files": [
-    "/bin",
-    "/lib"
-  ],
-  "homepage": "https://github.com/jamet-julien/find-unused",
-  "keywords": [
-    "oclif"
-  ],
-  "license": "MIT",
-  "main": "lib/index.js",
-  "oclif": {
-    "bin": "find-unused"
-  },
-  "repository": "jamet-julien/find-unused",
-  "scripts": {
-    "posttest": "eslint . --ext .ts --config .eslintrc",
-    "prepack": "rm -rf lib && tsc -b && oclif-dev readme",
-    "test": "echo NO TESTS",
-    "version": "oclif-dev readme && git add README.md"
-  },
-  "types": "lib/index.d.ts"
+    "name": "find-unused",
+    "description": "find all componend never used",
+    "version": "0.0.1",
+    "author": "Julien Jamet <jamet.julien@gmail.com>",
+    "bin": {
+        "find-unused": "./bin/run"
+    },
+    "bugs": "https://github.com/jamet-julien/find-unused/issues",
+    "dependencies": {
+        "@oclif/command": "^1",
+        "@oclif/config": "^1",
+        "@oclif/plugin-help": "^3",
+        "@types/inquirer": "^7.3.1",
+        "chalk": "^4.1.0",
+        "cosmiconfig": "^7.0.0",
+        "inquirer": "^7.3.3",
+        "tslib": "^1"
+    },
+    "devDependencies": {
+        "@oclif/dev-cli": "^1",
+        "@types/node": "^10",
+        "eslint": "^5.13",
+        "eslint-config-oclif": "^3.1",
+        "eslint-config-oclif-typescript": "^0.1",
+        "ts-node": "^8",
+        "typescript": "^3.3"
+    },
+    "engines": {
+        "node": ">=8.0.0"
+    },
+    "files": [
+        "/bin",
+        "/lib"
+    ],
+    "homepage": "https://github.com/jamet-julien/find-unused",
+    "keywords": [
+        "oclif"
+    ],
+    "license": "MIT",
+    "main": "lib/index.js",
+    "oclif": {
+        "bin": "find-unused"
+    },
+    "repository": "jamet-julien/find-unused",
+    "scripts": {
+        "posttest": "eslint . --ext .ts --config .eslintrc",
+        "prepack": "rm -rf lib && tsc -b && oclif-dev readme",
+        "test": "echo NO TESTS",
+        "version": "oclif-dev readme && git add README.md"
+    },
+    "types": "lib/index.d.ts"
 }

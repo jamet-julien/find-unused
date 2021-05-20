@@ -5,7 +5,7 @@
         "@Hooks/": "./components/hooks/",
         "@Molecules/": "./components/molecules/",
         "@Organisms/": "./components/organisms/",
-        "@Pages/": "./components/pages/",
+        "@Pages/": "./pages/",
         "@Queries/": "./components/queries/",
         "@Helpers/": "./helpers/",
 
