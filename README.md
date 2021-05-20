@@ -9,7 +9,9 @@ Find all componend never used and list them on `unusedreport.txt`
 
 <!-- toc -->
 
+-   [find-unused](#find-unused)
 -   [Usage](#usage)
+-   [File config](#fileconfig)
 -   [Commands](#commands)
 <!-- tocstop -->
 
@@ -18,11 +20,18 @@ Find all componend never used and list them on `unusedreport.txt`
 <!-- usage -->
 
 ```sh-session
-$ npx find-unused
+$ npm install -g find-unused
+$ find-unused COMMAND
 running command...
 $ find-unused (-v|--version|version)
-find-unused/0.0.0 darwin-x64 node-v14.15.4
+find-unused/0.0.1 darwin-x64 node-v14.15.4
+$ find-unused --help [COMMAND]
+USAGE
+  $ find-unused COMMAND
+...
 ```
+
+<!-- usagestop -->
 
 # File config
 
@@ -51,14 +60,9 @@ you can use `.findunusedrc` to define alias used on project
         "@Lang/": "./lang/"
     }
 }
-
-
-```
-
-<!-- usagestop -->
-
 # Commands
 
 <!-- commands -->
 
 <!-- commandsstop -->
+```
