@@ -1,7 +1,7 @@
 {
     "name": "find-unused",
     "description": "find all componend never used",
-    "version": "0.0.1",
+    "version": "0.0.11",
     "author": "Julien Jamet <jamet.julien@gmail.com>",
     "bin": {
         "find-unused": "./bin/run"
